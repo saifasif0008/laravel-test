@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Date;
 
-class EventsController extends BaseController
+class  EventsController extends BaseController
 {
-    public function getWarmupEvents() {
+    public function getWarmupEvents()
+    {
         return Event::all();
     }
 
@@ -100,8 +103,9 @@ class EventsController extends BaseController
     ]
      */
 
-    public function getEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 1');
+    public function getEventsWithWorkshops()
+    {
+        return response()->json(Event::with('workshops')->get());
     }
 
 
@@ -178,7 +182,12 @@ class EventsController extends BaseController
     ```
      */
 
-    public function getFutureEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 2');
+    public function getFutureEventsWithWorkshops()
+    {
+        $todaysDate = Carbon::now()->toDateTimeString();
+        $futureEvents = Event::with('workshops')->whereHas('workshops', function (Builder $query) use ($todaysDate) {
+            $query->where('start', '>', $todaysDate);
+        }, '>', 0)->get();
+        return response()->json($futureEvents);
     }
 }
